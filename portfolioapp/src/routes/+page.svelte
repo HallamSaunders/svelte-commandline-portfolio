@@ -51,12 +51,14 @@
         background-color: transparent;
         border: transparent;
         width: 100%;
-        flex: 1;
+        margin: 10px;
+        margin-left: 0px;
     }
 </style>
 
 <script lang="ts">
     import {onMount} from 'svelte';
+  import { writable } from 'svelte/store';
 
     let command = "";
 
@@ -68,7 +70,20 @@
     commandMap.set("interests", "a description of each topic and field I am passionate about");
     commandMap.set("bio", "here's a little about me");
 
-    let responses: string[] = [];
+    //keep track of responses and commands
+    //let responses: string[] = [];
+    let commandHistory: string[] = [];
+
+    const historyOfResponses = new Map<string, string[]>();
+    const commandResponseMap: {[key: string]: string[]} = {
+        'key1': ['value1', 'value2'],
+        'key2': ['value3', 'value4'],
+        'key3': ['value5', 'value6']
+    };
+
+    function addCommandResponse(command: string, response: string[]) {
+        commandResponseMap[command] = [...commandResponseMap[command], ...response];
+    }
 
     function handleInput(event: Event) {
         const inputElement = event.target as HTMLInputElement;
@@ -77,14 +92,12 @@
 
     function handleSubmit() {
         let valid = false;
-        let commandEntered = "";
-
+        //check if command exists
         for (const key of commandMap.keys()) {
             if (command === key) valid = true;
             break;
         }
-        if (!valid) handleCommand("!!invalidcommand!!");
-        if (valid) handleCommand(command);
+        handleCommand(command, valid);
     }
 
     function handleKeyDown(event: KeyboardEvent) {
@@ -93,21 +106,26 @@
         }
     }
 
-    function handleCommand(commandEntered: String) {
-        let response = "";
-        switch (commandEntered) {
-            case "!!invalidcommand!!":
-                responses = [...responses, "Please enter a valid command"];
-                break;
-            case "help":
-                for (const key of commandMap.keys()) {
-                    responses = [...responses, key + ": " + commandMap.get(key)];
-                }
-                break;
-            default:
-            response = "Please enter a recognised command."
-                break;
+    function handleCommand(commandEntered: string, valid: boolean) {
+        let output: string[] = [];
+        if (!valid) {
+            output.push("Please enter a valid command");
         }
+        if (valid) {
+            commandHistory = [...commandHistory, commandEntered];
+            //handle commands logic
+            switch (commandEntered) {
+                case "help":
+                    for (const key of commandMap.keys()) {
+                        output.push(key + ": " + commandMap.get(key));
+                    }
+                    break;
+                default:
+                    output.push("Please enter a valid command");
+                    break;
+            }
+        }
+        addCommandResponse(commandEntered, output);
     }
 </script>
 
@@ -116,13 +134,31 @@
         <h1>Welcome to my portfolio.</h1>
         <h2>Type the command "help" to get started.</h2>
     </div>
+
+    {#each Object.entries(commandResponseMap) as [command, responses]}
+        <div class="text-input">
+            <p>&gt;&gt; {command}</p>
+        </div>
+        {#each responses as response}
+            <div class="text-output">
+                <p>{response}</p>
+            </div>
+        {/each}
+    {/each}
+
+    <!--{#each Object.entries(commandResponseMap) as [command, responses]}
+        <div class="text-input">
+            <p>&gt;&gt; {command}</p>
+        </div>
+        {#each responses as response}
+            <div class="text-output">
+                <p>{response}</p>
+            </div>
+        {/each}
+    {/each}-->
+    
     <div class="text-input">
         <p>&gt;&gt;</p>
         <input on:input={handleInput} on:keydown={handleKeyDown} bind:value={command}/>
     </div>
-    {#each responses as response}
-        <div class="text-output">
-            <p>{response}</p>
-        </div>
-    {/each}
 </main>
