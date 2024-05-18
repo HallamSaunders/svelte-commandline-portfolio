@@ -58,7 +58,7 @@
 
 <script lang="ts">
     import {onMount} from 'svelte';
-  import { writable } from 'svelte/store';
+    import {writable} from 'svelte/store';
 
     let command = "";
 
@@ -71,18 +71,16 @@
     commandMap.set("bio", "here's a little about me");
 
     //keep track of responses and commands
-    //let responses: string[] = [];
     let commandHistory: string[] = [];
 
     const historyOfResponses = new Map<string, string[]>();
-    const commandResponseMap: {[key: string]: string[]} = {
-        'key1': ['value1', 'value2'],
-        'key2': ['value3', 'value4'],
-        'key3': ['value5', 'value6']
-    };
+    let commandResponseMap: {[key: string]: string[]} = {};
 
     function addCommandResponse(command: string, response: string[]) {
-        commandResponseMap[command] = [...commandResponseMap[command], ...response];
+        commandResponseMap = {
+            ...commandResponseMap,
+            command: response
+        };
     }
 
     function handleInput(event: Event) {
@@ -146,17 +144,6 @@
         {/each}
     {/each}
 
-    <!--{#each Object.entries(commandResponseMap) as [command, responses]}
-        <div class="text-input">
-            <p>&gt;&gt; {command}</p>
-        </div>
-        {#each responses as response}
-            <div class="text-output">
-                <p>{response}</p>
-            </div>
-        {/each}
-    {/each}-->
-    
     <div class="text-input">
         <p>&gt;&gt;</p>
         <input on:input={handleInput} on:keydown={handleKeyDown} bind:value={command}/>
