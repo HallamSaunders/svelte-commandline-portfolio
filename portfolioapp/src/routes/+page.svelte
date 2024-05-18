@@ -71,16 +71,14 @@
     commandMap.set("bio", "here's a little about me");
 
     //keep track of responses and commands
-    let commandHistory: string[] = [];
-
-    const historyOfResponses = new Map<string, string[]>();
-    let commandResponseMap: {[key: string]: string[]} = {};
+    let commandResponseArray: [string, string[]][] = [];
 
     function addCommandResponse(command: string, response: string[]) {
-        commandResponseMap = {
-            ...commandResponseMap,
-            command: response
-        };
+        //add new command and responses as array, updating UI by reassigning
+        commandResponseArray = [
+            ...commandResponseArray,
+            [command, response]
+        ];
     }
 
     function handleInput(event: Event) {
@@ -92,10 +90,10 @@
         let valid = false;
         //check if command exists
         for (const key of commandMap.keys()) {
-            if (command === key) valid = true;
+            if (command.toLowerCase() === key.toLowerCase()) valid = true;
             break;
         }
-        handleCommand(command, valid);
+        handleCommand(command.toLocaleLowerCase(), valid);
     }
 
     function handleKeyDown(event: KeyboardEvent) {
@@ -107,23 +105,25 @@
     function handleCommand(commandEntered: string, valid: boolean) {
         let output: string[] = [];
         if (!valid) {
-            output.push("Please enter a valid command");
+            output.push("Please enter a valid command.");
         }
         if (valid) {
-            commandHistory = [...commandHistory, commandEntered];
             //handle commands logic
             switch (commandEntered) {
                 case "help":
-                    for (const key of commandMap.keys()) {
-                        output.push(key + ": " + commandMap.get(key));
+                    for (const [key, value] of commandMap.entries()) {
+                        output.push(key + ": " + value);
                     }
                     break;
+                case "contact":
+
                 default:
-                    output.push("Please enter a valid command");
+                    output.push("Please enter a valid command.");
                     break;
             }
         }
         addCommandResponse(commandEntered, output);
+        command = "";
     }
 </script>
 
@@ -133,7 +133,7 @@
         <h2>Type the command "help" to get started.</h2>
     </div>
 
-    {#each Object.entries(commandResponseMap) as [command, responses]}
+    {#each commandResponseArray as [command, responses]}
         <div class="text-input">
             <p>&gt;&gt; {command}</p>
         </div>
