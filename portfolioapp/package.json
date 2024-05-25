@@ -21,6 +21,8 @@
 	},
 	"type": "module",
 	"dependencies": {
-		"firebase": "^10.12.1"
+		"firebase": "^10.12.1",
+		"rxfire": "^6.0.5",
+		"rxjs": "^7.8.1"
 	}
 }
