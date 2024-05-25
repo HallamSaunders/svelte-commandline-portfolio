@@ -59,6 +59,9 @@
 <script lang="ts">
     import {onMount} from 'svelte';
     import {writable} from 'svelte/store';
+    import { collection, getDocs } from 'firebase/firestore';
+    import { doc, getDoc } from 'firebase/firestore';
+    import { db } from '../lib/firebase/firebaseInit';
 
     let command = "";
 
@@ -116,7 +119,7 @@
                     }
                     break;
                 case "contact":
-
+                    output = handleContactCommand();
                 default:
                     output.push("Please enter a valid command.");
                     break;
@@ -124,6 +127,18 @@
         }
         addCommandResponse(commandEntered, output);
         command = "";
+    }
+
+    function handleContactCommand(): string[] {
+        const finalOutput: string[] = [];
+        let documents = [];
+        try {
+            const querySnapshot = getDocs(collection(db, 'contact'));
+            //documents = querySnapshot.docs.map(doc => ({ id: doc.id, data: doc.data() }));
+        } catch (e) {
+            finalOutput.push("Failed to load data.");
+        }
+        return finalOutput;
     }
 </script>
 
